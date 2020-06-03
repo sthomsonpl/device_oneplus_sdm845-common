@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2014, The Linux Foundation. All rights reserved.
+   Copyright (c) 2020, The LineageOS Project
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -27,62 +27,59 @@
    IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdlib.h>
+#include <android-base/properties.h>
 #define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/sysinfo.h>
+#include <sys/system_properties.h>
 #include <sys/_system_properties.h>
+
 #include "property_service.h"
 #include "vendor_init.h"
-#include <android-base/properties.h>
-#include <sys/sysinfo.h>
 
-int property_set(const char *key, const char *value) {
-    return __system_property_set(key, value);
+using android::base::GetProperty;
+
+void property_override(char const prop[], char const value[]) {
+  prop_info *pi;
+
+  pi = (prop_info *)__system_property_find(prop);
+  if (pi)
+    __system_property_update(pi, value, strlen(value));
+  else
+    __system_property_add(prop, strlen(prop), value, strlen(value));
 }
 
-void property_override(char const prop[], char const value[])
-{
-	prop_info *pi;
-
-	pi = (prop_info *)__system_property_find(prop);
-	if (pi)
-		__system_property_update(pi, value, strlen(value));
-	else
-		__system_property_add(prop, strlen(prop), value, strlen(value));
+void load_dalvikvm_properties() {
+  struct sysinfo sys;
+  sysinfo(&sys);
+  if (sys.totalram > 8192ull * 1024 * 1024) {
+    // from - phone-xhdpi-12288-dalvik-heap.mk
+    property_override("dalvik.vm.heapstartsize", "24m");
+    property_override("dalvik.vm.heapgrowthlimit", "384m");
+    property_override("dalvik.vm.heaptargetutilization", "0.42");
+    property_override("dalvik.vm.heapmaxfree", "56m");
+    }
+  else if(sys.totalram > 6144ull * 1024 * 1024) {
+    // from - phone-xhdpi-8192-dalvik-heap.mk
+    property_override("dalvik.vm.heapstartsize", "24m");
+    property_override("dalvik.vm.heapgrowthlimit", "256m");
+    property_override("dalvik.vm.heaptargetutilization", "0.46");
+    property_override("dalvik.vm.heapmaxfree", "48m");
+    }
+  else {
+    // from - phone-xhdpi-6144-dalvik-heap.mk
+    property_override("dalvik.vm.heapstartsize", "16m");
+    property_override("dalvik.vm.heapgrowthlimit", "256m");
+    property_override("dalvik.vm.heaptargetutilization", "0.5");
+    property_override("dalvik.vm.heapmaxfree", "32m");
+  }
+  property_override("dalvik.vm.heapsize", "512m");
+  property_override("dalvik.vm.heapminfree", "8m");
 }
 
-void property_override_dual(char const system_prop[], char const vendor_prop[], char const value[])
-{
-	property_override(system_prop, value);
-	property_override(vendor_prop, value);
-}
-
-void load_dalvikvm_properties()
-{
-	struct sysinfo sys;
-
-	sysinfo(&sys);
-	if (sys.totalram < 7000ull * 1024 * 1024)
-	{
-		// 6GB RAM
-		property_override_dual("dalvik.vm.heapstartsize", "dalvik.vm.heapstartsize", "16m");
-		property_override_dual("dalvik.vm.heaptargetutilization", "dalvik.vm.heaptargetutilization", "0.5");
-		property_override_dual("dalvik.vm.heapmaxfree", "dalvik.vm.heapmaxfree", "32m");
-	}
-	else
-	{
-		// 8/10GB RAM
-		property_override_dual("dalvik.vm.heapstartsize", "dalvik.vm.heapstartsize", "24m");
-		property_override_dual("dalvik.vm.heaptargetutilization", "dalvik.vm.heaptargetutilization", "0.46");
-		property_override_dual("dalvik.vm.heapmaxfree", "dalvik.vm.heapmaxfree", "48m");
-	}
-
-	property_override_dual("dalvik.vm.heapgrowthlimit", "dalvik.vm.heapgrowthlimit", "256m");
-	property_override_dual("dalvik.vm.heapsize", "dalvik.vm.heapsize", "512m");
-	property_override_dual("dalvik.vm.heapminfree", "dalvik.vm.heapminfree", "8m");
-}
-
-void vendor_load_properties()
-{
-	// Load dalvik config
-	load_dalvikvm_properties();
+void vendor_load_properties() {
+  // dalvikvm props
+  load_dalvikvm_properties();
 }
