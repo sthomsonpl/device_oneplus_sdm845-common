@@ -18,7 +18,6 @@ persist.vendor.dpmhalservice.    u:object_r:vendor_persist_dpm_prop:s0
 
 # NFC
 persist.factoryota.           u:object_r:vendor_nfc_prop:s0
-persist.nfc.                  u:object_r:nfc_nq_prop:s0
 persist.vendor.nfc.           u:object_r:vendor_nfc_prop:s0
 persist.vendor.oem.nfc.rf.    u:object_r:nfc_nq_prop:s0
 ro.nfc.                       u:object_r:vendor_nfc_prop:s0
