@@ -41,3 +41,6 @@
 
 # Sys files
 /sys/project_info(/.*)?    u:object_r:sysfs_project_info:s0
+
+# tombstones
+/data/vendor/tombstones/rfs(/.*)?              u:object_r:rfs_tombstone_data_file:s0
