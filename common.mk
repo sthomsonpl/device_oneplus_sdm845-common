@@ -220,7 +220,7 @@ PRODUCT_PACKAGES += \
 
 # Doze
 PRODUCT_PACKAGES += \
-    OnePlusDoze
+    OPlusDoze
 
 # DRM
 PRODUCT_PACKAGES += \
@@ -338,12 +338,6 @@ PRODUCT_PACKAGES += \
     vendor.nxp.nxpese@1.0:64 \
     vendor.nxp.nxpnfc@1.0:64
 
-# OnePlus
-PRODUCT_PACKAGES += \
-    oneplus-fwk
-
-PRODUCT_BOOT_JARS += \
-    oneplus-fwk
 
 # Power
 PRODUCT_PACKAGES += \
@@ -372,7 +366,7 @@ PRODUCT_COPY_FILES += \
 # Soong namespaces
 PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH) \
-    hardware/oneplus \
+    hardware/oplus \
     vendor/qcom/opensource/usb/etc
 
 # Telephony
